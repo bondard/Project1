@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--Command lines needed for the project: leaflet librarym api.-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <title>Project_1- Philip Dragilev 321007684, Daniel Bondar 308141019</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"/>
+	<link rel="stylesheet" href="style.css"/>
+    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+<!--coordination to the area needed-->
+var map = L.map("map", {center: [42.482601, -71.402653], zoom: 10});
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", 
+    {attribution: "© OpenStreetMap"}
+).addTo(map); //loading boston map
+<!--This is how we upload the JSON to the HTML-->
+var url = "https://raw.githubusercontent.com/bondard/Project1/master/project1";//loading the geojson layer from external link in github
+$.getJSON(url, function(data) {	
+//color
+		  L.geoJSON(data, {
+    style: {
+        color: "grey", 
+        weight: 3, 
+        fillColor: "red", 
+        fillOpacity: 0.5
+    }
+}).addTo(map);
+// creating symbology by the value of population at 2016 
+	L.geoJSON(data, {
+		polyToLayer: function (feature, latlng) {
+			var markerOptions = $.extend(java.geojson)
+			if (feature.properties.POPULATION == '0-791') {
+				markerOptions.fillColor = '#00ff00' //if the range of population is 0-791 the polygon will get the color green
+			}
+			else if (feature.properties.POPULATION == '792-1583') {
+				markerOptions.fillColor = '#ff80ff' // if the range of population is 792-1583 polygon will get the color pink
+			}
+			else if (feature.properties.POPULATION == '1584-2374') {
+				markerOptions.fillColor = '#ff6600' // if the range of population is 1584-2374 polygon will get the color orange
+			}
+			else if (feature.properties.POPULATION == '2375-3166') {
+				markerOptions.fillColor = '#0066ff' // if the range of population is 2375-3166 polygon will get the color blue 
+			}
+			else if (feature.properties.POPULATION == '3167-3957') {
+				markerOptions.fillColor = '#666699' // if the range of population is 3167-3957 polygon will get the color gray
+			} 
+			return L.PolyMarker(POPULATION, markerOptions.fillColor);
+		},// creating symbology by the value of population at 2016 
+		onEachFeature: function(feature, layer) {
+            var popupText ='POPULATION:<br />'
+			if (feature.properties.POPULATION) {
+				popupText = popupText + feature.properties.POPULATION
+			}
+			else {
+				popupText = popupText + 'NA'
+			}//loop that gives us NA if there is no data found for population.
+			popupText = popupText + '<br /><br />LAN:<br />'
+			if (feature.properties.LAN) {
+				popupText = popupText + feature.properties.LAN
+			}
+			else {
+				popupText = popupText + 'No LAN'
+			}//loop that gives us No LAN if there is no data found for LAN.
+			layer.bindPopup(popupText);
+        },//creating a popup containing the amount of population and LAN VALUE (LIGHT AT NIGHT).
+	}).addTo(map);
+	
+});
+
+var legend = L.control({position: "topright"});
+//creating a legend showing the amount of population in each polygon by 5 classes.
+legend.onAdd = function(map) {
+    var div = L.DomUtil.create("div", "legend");        
+    div.innerHTML = '<b>POPULATION in 2016</b><br>\
+        <small>by blockgroup</small><br>\
+        <i style="background-color: #00ff00"></i>0-791<br>\
+        <i style="background-color: #ff80ff"></i>792-1583<br>\
+        <i style="background-color: #ff6600"></i>1584-2374<br>\
+        <i style="background-color: #0066ff"></i>2375-3166<br>\
+        <i style="background-color: #666699"></i>3167-3957<br>\
+    '
+    return div;
+};
+
+legend.addTo(map);
+
+var description = L.control({position: "bottomleft"});
+//creating a description explaning what we see in the map.
+
+description.onAdd = function(map) {
+    var div = L.DomUtil.create("div", "description");
+    div.innerHTML = '\
+        <p><b>Population in 2016 in boston area</b></p><hr>\
+        <p>The data came from ESRI data- US Census <p/>\
+		<p>This map shows the amount of population in each blockgroup<p/>\
+        The following shapes were added:<br/>\
+        <p><ul>\
+        <li>A polygon</li>\
+        </ul></p>\
+        The polygon layer has a <b>popup</b>. Click on the polygon to see it!<hr> the polygons show the amount of population and LAN( LIGHT AT NIGHT)\<hr>\
+        Created with the Leaflet library<br/>\
+    '
+    return div;
+};
+
+description.addTo(map);
+
+    </script>
+</body>
+</html>
