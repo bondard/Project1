@@ -1,92 +1,98 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!--Command lines needed for the project: leaflet librarym api.-->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <title>Project_1- Philip Dragilev 321007684, Daniel Bondar 308141019</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"/> 
 	<link rel="stylesheet" href="style.css"/>
     <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
 </head>
 <body>
     <div id="map"></div>
     <script>
-<!--coordination to the area needed-->
+    //coordination to the area needed>
 var map = L.map("map", {center: [42.482601, -71.402653], zoom: 10});
-L.tileLayer(
+L.tileLayer( 
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", 
     {attribution: "© OpenStreetMap"}
 ).addTo(map); //loading boston map
-<!--This is how we upload the JSON to the HTML-->
+   //This is how we upload the JSON to the HTML-->
 var url = "https://raw.githubusercontent.com/bondard/Project1/master/project1";//loading the geojson layer from external link in github
 $.getJSON(url, function(data) {	
 //color
+
+function style(feature) {
+    return {
+        fillColor: getColor(feature.properties.POPULATION)
+		
+    };
+}
+ //choosing the range of the symbology by 5 class as we checked in QGIS
+function getColor(x) {
+    if(x <= 791) {return "#7FFF00"} else //if the number of the population smaller then 791 the polygon will get the color green
+    if(x <= 1584) {return "#FF00FF"} else //if the number of the population smaller then 1584 the polygon will get the color purple
+	if(x <= 2375) {return "#00FFFF"} else //if the number of the population smaller then 2375 the polygon will get the color blue
+    if(x <= 3167) {return "#FFFF00"}  else //if the number of the population smaller then 3167 the polygon will get the color yellow
+	 if(x <= 3957) {return "#000000"} //if the number of the population smaller then 3957 the polygon will get the color grey
+}
 		  L.geoJSON(data, {
     style: {
-        color: "grey", 
-        weight: 3, 
-        fillColor: "red", 
-        fillOpacity: 0.5
+        color: "x", 
+        weight: 2, 
+        fillColor: "x", 
+        fillOpacity: 0.09
     }
+	
 }).addTo(map);
 // creating symbology by the value of population at 2016 
+
+//creating a popup containing the amount of population in the years 2016 and 2010.
+
+//creating a popup containing the amount of population in the years 2016 and 2010.
 	L.geoJSON(data, {
-		polyToLayer: function (feature, latlng) {
-			var markerOptions = $.extend(java.geojson)
-			if (feature.properties.POPULATION == '0-791') {
-				markerOptions.fillColor = '#00ff00' //if the range of population is 0-791 the polygon will get the color green
-			}
-			else if (feature.properties.POPULATION == '792-1583') {
-				markerOptions.fillColor = '#ff80ff' // if the range of population is 792-1583 polygon will get the color pink
-			}
-			else if (feature.properties.POPULATION == '1584-2374') {
-				markerOptions.fillColor = '#ff6600' // if the range of population is 1584-2374 polygon will get the color orange
-			}
-			else if (feature.properties.POPULATION == '2375-3166') {
-				markerOptions.fillColor = '#0066ff' // if the range of population is 2375-3166 polygon will get the color blue 
-			}
-			else if (feature.properties.POPULATION == '3167-3957') {
-				markerOptions.fillColor = '#666699' // if the range of population is 3167-3957 polygon will get the color gray
-			} 
-			return L.PolyMarker(POPULATION, markerOptions.fillColor);
-		},// creating symbology by the value of population at 2016 
+	    style: style,
 		onEachFeature: function(feature, layer) {
-            var popupText ='POPULATION:<br />'
+            var popupText ='POPULATION2016:<br/>'
 			if (feature.properties.POPULATION) {
 				popupText = popupText + feature.properties.POPULATION
 			}
 			else {
 				popupText = popupText + 'NA'
 			}//loop that gives us NA if there is no data found for population.
-			popupText = popupText + '<br /><br />LAN:<br />'
-			if (feature.properties.LAN) {
-				popupText = popupText + feature.properties.LAN
+			popupText = popupText + '<br /><br />POPULATION2010:<br/>'
+			if (feature.properties.POP2010) {
+				popupText = popupText + feature.properties.POP2010
 			}
 			else {
-				popupText = popupText + 'No LAN'
-			}//loop that gives us No LAN if there is no data found for LAN.
+				popupText = popupText + 'NA'
+			}//loop that gives us NA if there is no data found for POP2010.
 			layer.bindPopup(popupText);
-        },//creating a popup containing the amount of population and LAN VALUE (LIGHT AT NIGHT).
+        },
 	}).addTo(map);
 	
-});
+}); //creating a popup containing the amount of population in the years 2016 and 2010.
 
 var legend = L.control({position: "topright"});
-//creating a legend showing the amount of population in each polygon by 5 classes.
+//creating a legend showing the amount of population in each polygon by 5 classes as we checked in QGIS.
 legend.onAdd = function(map) {
     var div = L.DomUtil.create("div", "legend");        
     div.innerHTML = '<b>POPULATION in 2016</b><br>\
         <small>by blockgroup</small><br>\
-        <i style="background-color: #00ff00"></i>0-791<br>\
-        <i style="background-color: #ff80ff"></i>792-1583<br>\
-        <i style="background-color: #ff6600"></i>1584-2374<br>\
-        <i style="background-color: #0066ff"></i>2375-3166<br>\
-        <i style="background-color: #666699"></i>3167-3957<br>\
-    '
-    return div;
+        <i style="background-color: #7FFF00"></i>0-791<br>\
+        <i style="background-color: #FF00FF"></i>792-1583<br>\
+        <i style="background-color: #00FFFF"></i>1584-2374<br>\
+        <i style="background-color: #FFFF00"></i>2375-3166<br>\
+        <i style="background-color: #000000"></i>3167-3957<br>\ '
+	return div;
 };
-
+ 
 legend.addTo(map);
+ //in the legend the ranger from 0 to 791 will get the color green
+ //in the legend the ranger from 792 to 1583 will get the color purple
+ //in the legend the ranger from 1584 to 2374 will get the color blue
+ //in the legend the ranger from 2375 to 3166 will get the color yellow
+ //in the legend the ranger from 3167 to 3957 will get the color grey
+
 
 var description = L.control({position: "bottomleft"});
 //creating a description explaning what we see in the map.
@@ -95,13 +101,13 @@ description.onAdd = function(map) {
     var div = L.DomUtil.create("div", "description");
     div.innerHTML = '\
         <p><b>Population in 2016 in boston area</b></p><hr>\
-        <p>The data came from ESRI data- US Census <p/>\
-		<p>This map shows the amount of population in each blockgroup<p/>\
+        <p>The data came from ESRI maps and data- US Census <p/>\
+		<p>This map shows the amount of population near boston in 2016 in each blockgroup <p/>\
         The following shapes were added:<br/>\
         <p><ul>\
         <li>A polygon</li>\
         </ul></p>\
-        The polygon layer has a <b>popup</b>. Click on the polygon to see it!<hr> the polygons show the amount of population and LAN( LIGHT AT NIGHT)\<hr>\
+        The polygon layer has a <b>popup</b>. Click on the polygon to see it!<hr> the polygons popup show the amount of population in the years 2016 and 2010\<hr>\
         Created with the Leaflet library<br/>\
     '
     return div;
